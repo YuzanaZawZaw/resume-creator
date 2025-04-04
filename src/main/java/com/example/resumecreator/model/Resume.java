@@ -1,9 +1,13 @@
 package com.example.resumecreator.model;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Resume {
@@ -15,6 +19,33 @@ public class Resume {
     private String phone;
     private String summary;
 
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Education> educations;
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Experience> experiences;
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Skill> skills;
+
+    public List<Education> getEducations() {
+        return educations;
+    }
+    public void setEducations(List<Education> educations) {
+        this.educations = educations;
+    }
+    public List<Experience> getExperiences() {
+        return experiences;
+    }
+    public void setExperiences(List<Experience> experiences) {
+        this.experiences = experiences;
+    }
+    public List<Skill> getSkills() {
+        return skills;
+    }
+    public void setSkills(List<Skill> skills) {
+        this.skills = skills;
+    }
     public Long getId() {
         return id;
     }

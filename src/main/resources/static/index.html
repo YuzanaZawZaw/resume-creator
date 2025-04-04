@@ -5,11 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resume Creator</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-section {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1 class="mt-5">Resume Creator</h1>
-        <form id="resume-form">
+
+        <form id="resume-form" class="form-section">
+            <h2>Personal Information</h2>
             <div class="form-group">
                 <label for="name">Name</label>
                 <input type="text" class="form-control" id="name" required>
@@ -26,16 +36,88 @@
                 <label for="summary">Summary</label>
                 <textarea class="form-control" id="summary" rows="3" required></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Create Resume</button>
+            <button type="submit" class="btn btn-primary">Save Personal Information</button>
         </form>
+
+        <div id="education-section" class="form-section">
+            <h2>Education</h2>
+            <form id="education-form">
+                <div class="form-group">
+                    <label for="institution">Institution</label>
+                    <input type="text" class="form-control" id="institution" required>
+                </div>
+                <div class="form-group">
+                    <label for="degree">Degree</label>
+                    <input type="text" class="form-control" id="degree" required>
+                </div>
+                <div class="form-group">
+                    <label for="startDateEdu">Start Date</label>
+                    <input type="date" class="form-control" id="startDateEdu" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDateEdu">End Date</label>
+                    <input type="date" class="form-control" id="endDateEdu">
+                </div>
+                <div class="form-group">
+                    <label for="descriptionEdu">Description</label>
+                    <textarea class="form-control" id="descriptionEdu" rows="2"></textarea>
+                </div>
+                <button type="button" class="btn btn-success add-education">Add Education</button>
+            </form>
+            <div id="education-list"></div>
+        </div>
+
+        <div id="experience-section" class="form-section">
+            <h2>Experience</h2>
+            <form id="experience-form">
+                <div class="form-group">
+                    <label for="company">Company</label>
+                    <input type="text" class="form-control" id="company" required>
+                </div>
+                <div class="form-group">
+                    <label for="jobTitle">Job Title</label>
+                    <input type="text" class="form-control" id="jobTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="startDateExp">Start Date</label>
+                    <input type="date" class="form-control" id="startDateExp" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDateExp">End Date</label>
+                    <input type="date" class="form-control" id="endDateExp">
+                </div>
+                <div class="form-group">
+                    <label for="descriptionExp">Description</label>
+                    <textarea class="form-control" id="descriptionExp" rows="2"></textarea>
+                </div>
+                <button type="button" class="btn btn-success add-experience">Add Experience</button>
+            </form>
+            <div id="experience-list"></div>
+        </div>
+
+        <div id="skills-section" class="form-section">
+            <h2>Skills</h2>
+            <form id="skills-form">
+                <div class="form-group">
+                    <label for="skillName">Skill Name</label>
+                    <input type="text" class="form-control" id="skillName" required>
+                </div>
+                <button type="button" class="btn btn-success add-skill">Add Skill</button>
+            </form>
+            <div id="skills-list"></div>
+        </div>
+
         <div id="resumes" class="mt-5"></div>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
             const apiUrl = '/api/resumes';
+            let currentResumeId = null;
 
+            // Function to fetch and display resumes
             function fetchResumes() {
                 $.get(apiUrl, function(data) {
                     let resumesHtml = '';
@@ -46,6 +128,7 @@
                                 <p class="card-text">Email: ${resume.email}</p>
                                 <p class="card-text">Phone: ${resume.phone}</p>
                                 <p class="card-text">Summary: ${resume.summary}</p>
+                                <button class="btn btn-info view-details" data-resume-id="${resume.id}">View Details</button>
                             </div>
                         </div>`;
                     });
@@ -53,6 +136,7 @@
                 });
             }
 
+            // Handle personal information form submission
             $('#resume-form').submit(function(event) {
                 event.preventDefault();
                 const resume = {
@@ -61,18 +145,128 @@
                     phone: $('#phone').val(),
                     summary: $('#summary').val()
                 };
+
+                if (currentResumeId) {
+                    // Update existing resume
+                    $.ajax({
+                        type: 'PUT',
+                        url: `${apiUrl}/${currentResumeId}`,
+                        contentType: 'application/json',
+                        data: JSON.stringify(resume),
+                        success: function() {
+                            fetchResumes();
+                            alert('Personal information updated successfully!');
+                        },
+                        error: function() {
+                            alert('Error updating personal information.');
+                        }
+                    });
+                } else {
+                    // Create new resume
+                    $.ajax({
+                        type: 'POST',
+                        url: apiUrl,
+                        contentType: 'application/json',
+                        data: JSON.stringify(resume),
+                        success: function(newResume) {
+                            currentResumeId = newResume.id;
+                            fetchResumes();
+                            alert('Personal information saved successfully!');
+                        },
+                        error: function() {
+                            alert('Error saving personal information.');
+                        }
+                    });
+                }
+            });
+
+            // Education
+            $('.add-education').click(function() {
+                if (!currentResumeId) {
+                    alert('Please save personal information first.');
+                    return;
+                }
+
+                const education = {
+                    institution: $('#institution').val(),
+                    degree: $('#degree').val(),
+                    startDate: $('#startDateEdu').val(),
+                    endDate: $('#endDateEdu').val(),
+                    description: $('#descriptionEdu').val()
+                };
+
                 $.ajax({
                     type: 'POST',
-                    url: apiUrl,
+                    url: `${apiUrl}/${currentResumeId}/educations`,
                     contentType: 'application/json',
-                    data: JSON.stringify(resume),
+                    data: JSON.stringify(education),
                     success: function() {
-                        fetchResumes();
-                        $('#resume-form')[0].reset();
+                        $('#education-form')[0].reset();
+                        alert('Education added successfully!');
+                    },
+                    error: function() {
+                        alert('Error adding education.');
                     }
                 });
             });
 
+             // Experience
+            $('.add-experience').click(function() {
+                if (!currentResumeId) {
+                    alert('Please save personal information first.');
+                    return;
+                }
+
+                const experience = {
+                    company: $('#company').val(),
+                    jobTitle: $('#jobTitle').val(),
+                    startDate: $('#startDateExp').val(),
+                    endDate: $('#endDateExp').val(),
+                    description: $('#descriptionExp').val()
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: `${apiUrl}/${currentResumeId}/experiences`,
+                    contentType: 'application/json',
+                    data: JSON.stringify(experience),
+                    success: function() {
+                        $('#experience-form')[0].reset();
+                        alert('Experience added successfully!');
+                    },
+                    error: function() {
+                        alert('Error adding experience.');
+                    }
+                });
+            });
+
+            // Skills
+            $('.add-skill').click(function() {
+                if (!currentResumeId) {
+                    alert('Please save personal information first.');
+                    return;
+                }
+
+                const skill = {
+                    name: $('#skillName').val()
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: `${apiUrl}/${currentResumeId}/skills`,
+                    contentType: 'application/json',
+                    data: JSON.stringify(skill),
+                    success: function() {
+                        $('#skills-form')[0].reset();
+                        alert('Skill added successfully!');
+                    },
+                    error: function() {
+                        alert('Error adding skill.');
+                    }
+                });
+            });
+
+            // Initial fetch
             fetchResumes();
         });
     </script>
