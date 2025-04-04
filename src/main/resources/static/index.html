@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Creator</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Resume Creator</h1>
+        <form id="resume-form">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="text" class="form-control" id="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="summary">Summary</label>
+                <textarea class="form-control" id="summary" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Resume</button>
+        </form>
+        <div id="resumes" class="mt-5"></div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const apiUrl = '/api/resumes';
+
+            function fetchResumes() {
+                $.get(apiUrl, function(data) {
+                    let resumesHtml = '';
+                    data.forEach(resume => {
+                        resumesHtml += `<div class="card mt-3">
+                            <div class="card-body">
+                                <h5 class="card-title">${resume.name}</h5>
+                                <p class="card-text">Email: ${resume.email}</p>
+                                <p class="card-text">Phone: ${resume.phone}</p>
+                                <p class="card-text">Summary: ${resume.summary}</p>
+                            </div>
+                        </div>`;
+                    });
+                    $('#resumes').html(resumesHtml);
+                });
+            }
+
+            $('#resume-form').submit(function(event) {
+                event.preventDefault();
+                const resume = {
+                    name: $('#name').val(),
+                    email: $('#email').val(),
+                    phone: $('#phone').val(),
+                    summary: $('#summary').val()
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: apiUrl,
+                    contentType: 'application/json',
+                    data: JSON.stringify(resume),
+                    success: function() {
+                        fetchResumes();
+                        $('#resume-form')[0].reset();
+                    }
+                });
+            });
+
+            fetchResumes();
+        });
+    </script>
+</body>
+</html>
