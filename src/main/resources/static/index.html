@@ -115,6 +115,7 @@
     <script>
         $(document).ready(function() {
             const apiUrl = '/api/resumes';
+            const saveUrl = '/api/resumes/create';
             let currentResumeId = null;
 
             // Function to fetch and display resumes
@@ -165,7 +166,7 @@
                     // Create new resume
                     $.ajax({
                         type: 'POST',
-                        url: apiUrl,
+                        url: saveUrl,
                         contentType: 'application/json',
                         data: JSON.stringify(resume),
                         success: function(newResume) {

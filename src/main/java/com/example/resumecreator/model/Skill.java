@@ -1,5 +1,7 @@
 package com.example.resumecreator.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -11,6 +13,7 @@ public class Skill {
 
     @ManyToOne
     @JoinColumn(name = "resume_id")
+    @JsonIgnore
     private Resume resume;
 
     // Getters and setters

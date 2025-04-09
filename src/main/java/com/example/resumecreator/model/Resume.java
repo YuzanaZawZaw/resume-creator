@@ -2,6 +2,8 @@ package com.example.resumecreator.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,12 +22,15 @@ public class Resume {
     private String summary;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Education> educations;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Experience> experiences;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Skill> skills;
 
     public List<Education> getEducations() {

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.resumecreator.dto.ResumeDTO;
 import com.example.resumecreator.model.Education;
 import com.example.resumecreator.model.Experience;
 import com.example.resumecreator.model.Resume;
@@ -27,7 +28,7 @@ public class ResumeController {
     private ResumeService resumeService;
 
     @GetMapping
-    public List<Resume> getAllResumes() {
+    public List<ResumeDTO> getAllResumes() {
         return resumeService.getAllResumes();
     }
 
@@ -38,9 +39,9 @@ public class ResumeController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public Resume createResume(@RequestBody Resume resume) {
-        return resumeService.saveResume(resume);
+    @PostMapping("/create")
+    public Resume createResume(@RequestBody ResumeDTO resume) {
+        return resumeService.saveResumeDTO(resume);
     }
 
     @PutMapping("/{id}")

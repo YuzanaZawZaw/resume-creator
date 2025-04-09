@@ -1,5 +1,9 @@
 package com.example.resumecreator.service;
 
+import com.example.resumecreator.dto.EducationDTO;
+import com.example.resumecreator.dto.ExperienceDTO;
+import com.example.resumecreator.dto.ResumeDTO;
+import com.example.resumecreator.dto.SkillDTO;
 import com.example.resumecreator.model.Education;
 import com.example.resumecreator.model.Experience;
 import com.example.resumecreator.model.Resume;
@@ -14,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ResumeService {
@@ -29,12 +34,22 @@ public class ResumeService {
     @Autowired
     private SkillRepository skillRepository;
 
-    public List<Resume> getAllResumes() {
-        return resumeRepository.findAll();
+    public List<ResumeDTO> getAllResumes() {
+        List<Resume> resumes = resumeRepository.findAll();
+        return resumes.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     public Optional<Resume> getResumeById(Long id) {
         return resumeRepository.findById(id);
+    }
+
+    public Resume saveResumeDTO(ResumeDTO resume) {
+        Resume resumeEntity = new Resume();
+        resumeEntity.setName(resume.getName());
+        resumeEntity.setEmail(resume.getEmail());
+        resumeEntity.setPhone(resume.getPhone());
+        resumeEntity.setSummary(resume.getSummary());
+        return resumeRepository.save(resumeEntity);
     }
 
     public Resume saveResume(Resume resume) {
@@ -67,6 +82,36 @@ public class ResumeService {
 
     public void deleteSkill(Long id) {
         skillRepository.deleteById(id);
+    }
+
+    public ResumeDTO mapToDTO(Resume resume) {
+        ResumeDTO dto = new ResumeDTO();
+        dto.setId(resume.getId());
+        dto.setName(resume.getName());
+        dto.setEmail(resume.getEmail());
+        dto.setPhone(resume.getPhone());
+        dto.setSummary(resume.getSummary());
+        dto.setEducations(resume.getEducations().stream().map(education -> {
+            EducationDTO educationDTO = new EducationDTO();
+            educationDTO.setId(education.getId());
+            educationDTO.setDegree(education.getDegree());
+            educationDTO.setInstitution(education.getInstitution());
+            return educationDTO;
+        }).collect(Collectors.toList()));
+        dto.setExperiences(resume.getExperiences().stream().map(experience -> {
+            ExperienceDTO experienceDTO = new ExperienceDTO();
+            experienceDTO.setId(experience.getId());
+            experienceDTO.setJobTitle(experience.getJobTitle());
+            experienceDTO.setCompany(experience.getCompany());
+            return experienceDTO;
+        }).collect(Collectors.toList()));
+        dto.setSkills(resume.getSkills().stream().map(skill -> {
+            SkillDTO skillDTO = new SkillDTO();
+            skillDTO.setId(skill.getId());
+            skillDTO.setName(skill.getName());
+            return skillDTO;
+        }).collect(Collectors.toList()));
+        return dto;
     }
 
 }
