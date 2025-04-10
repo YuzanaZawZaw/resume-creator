@@ -268,8 +268,12 @@
                                 <p class="card-text">Phone: ${resume.phone}</p>
                                 <p class="card-text">Summary: ${resume.summary}</p>
                                 <p class="card-text">Current Position: ${resume.currentPosition}</p>
-                                <button class="btn btn-info view-details" data-resume-id="${resume.id}">View Details</button>
-                                <button type="button" class="btn btn-primary mt-3 download-pdf-btn" data-resume-id="${resume.id}">Download PDF</button>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <button class="btn btn-info view-details" data-resume-id="${resume.id}">View Details</button>
+                                    <button type="button" class="btn btn-outline-secondary download-pdf-btn" data-resume-id="${resume.id}">
+                                        <img src="/icon/icons8-download-32.png" alt="Download PDF" style="width: 24px; height: 24px;">
+                                    </button>
+                                </div>
                             </div>
                         </div>`;
                     });
@@ -611,57 +615,53 @@
                     let leftY = 10;
                     let rightY = 20;
 
-                    // Set default font for non-title text
-                    doc.setFont('Aileron', 'normal');
-                    doc.setFontSize(10);
-
-                    // Helper: adds a new page, resets positions, and draws the left panel background.
                     function addNewPage() {
                         doc.addPage();
                         leftY = 10;
                         rightY = 20;
-                        // Draw left panel background for new page
                         doc.setFillColor(240, 240, 240);
                         doc.rect(0, 0, leftWidth, pageHeight, 'F');
-                        // Reset default font for non-title text on new page
                         doc.setFont('Aileron', 'normal');
                         doc.setFontSize(10);
                     }
 
-                    // Draw left panel background on the first page
                     doc.setFillColor(240, 240, 240);
                     doc.rect(0, 0, leftWidth, pageHeight, 'F');
 
-                    // ====== LEFT PANEL: PHOTO + CONTACT ======
                     if (resume.photo) {
                         const imgData = `data:image/jpeg;base64,${resume.photo}`;
                         doc.addImage(imgData, 'JPEG', 10, leftY, 40, 40);
                         leftY += 50;
                     }
-                    // Contact Title (bold, size 12)
-                    doc.setFont('Aileron', 'bold');
-                    doc.setFontSize(12);
-                    doc.text("Contact", 10, leftY);
+
+                    doc.setFont('Now', 'bold');
+                    doc.setFontSize(14);
+                    doc.setTextColor(0);
+                    doc.text("CONTACT", 10, leftY);
                     leftY += 4;
                     doc.setLineWidth(0.2);
                     doc.line(10, leftY, leftWidth - 10, leftY);
                     leftY += 5;
-                    // Contact details (normal, size 10)
+
                     doc.setFont('Aileron', 'normal');
                     doc.setFontSize(10);
                     doc.text(`Name: ${resume.name}`, 10, leftY);
                     leftY += 5;
-                    doc.text(`Email: ${resume.email}`, 10, leftY);
-                    leftY += 5;
+                    const emailLines = doc.splitTextToSize(`Email: ${resume.email}`, leftWidth - 20);
+                    emailLines.forEach(line => {
+                        if (leftY >= 280 || rightY >= 280) { addNewPage(); }
+                        doc.text(line, 10, leftY);
+                        leftY += 5;
+                    });
                     doc.text(`Phone: ${resume.phone}`, 10, leftY);
                     leftY += 10;
 
                     if (leftY > 280 || rightY > 280) { addNewPage(); }
 
-                    // ====== LEFT PANEL: EDUCATION ======
-                    doc.setFont('Aileron', 'bold');
-                    doc.setFontSize(12);
-                    doc.text("Education", 10, leftY);
+                    doc.setFont('Now', 'bold');
+                    doc.setFontSize(14);
+                    doc.setTextColor(0);
+                    doc.text("EDUCATION", 10, leftY);
                     leftY += 4;
                     doc.line(10, leftY, leftWidth - 10, leftY);
                     leftY += 5;
@@ -686,11 +686,11 @@
                         leftY += 10;
                     }
 
-                    // ====== LEFT PANEL: TECHNICAL SKILLS ======
                     if (resume.skills && resume.skills.length > 0) {
-                        doc.setFont('Aileron', 'bold');
-                        doc.setFontSize(12);
-                        doc.text("Technical Skills", 10, leftY);
+                        doc.setFont('Now', 'bold');
+                        doc.setFontSize(14);
+                        doc.setTextColor(0);
+                        doc.text("TECHNICAL SKILLS", 10, leftY);
                         leftY += 4;
                         doc.line(10, leftY, leftWidth - 10, leftY);
                         leftY += 5;
@@ -706,18 +706,18 @@
                         });
                     }
 
-                    // ====== LEFT PANEL: SOCIAL LINKS ======
+                    leftY += 10;
                     if (resume.links && resume.links.length > 0) {
-                        doc.setFont('Aileron', 'bold');
-                        doc.setFontSize(12);
-                        doc.text("Social Links", 10, leftY);
+                        doc.setFont('Now', 'bold');
+                        doc.setFontSize(14);
+                        doc.setTextColor(0);
+                        doc.text("SOCIAL LINKS", 10, leftY);
                         leftY += 4;
                         doc.line(10, leftY, leftWidth - 10, leftY);
                         leftY += 5;
                         doc.setFont('Aileron', 'normal');
                         doc.setFontSize(10);
                         resume.links.forEach((link) => {
-                            // Option 1: Print as text (non-clickable)
                             const linkText = `${link.description}: ${link.url}`;
                             const textLines = doc.splitTextToSize(linkText, leftWidth - 20);
                             textLines.forEach(line => {
@@ -725,56 +725,68 @@
                                 doc.text(line, 10, leftY);
                                 leftY += 5;
                             });
-
-                            // Option 2: Uncomment below to add clickable links (if supported)
-                            // if (leftY >= 280 || rightY >= 280) { addNewPage(); }
-                            // doc.textWithLink(`${link.description}`, 10, leftY, { url: link.url });
-                            // leftY += 5;
                         });
                     }
 
-                    // ====== RIGHT PANEL: SUMMARY ======
-                    doc.setFont('Aileron', 'bold');
-                    doc.setFontSize(18);
-                    doc.text('Resume', rightX, rightY);
+                    doc.setFont('Now', 'bold');
+                    doc.setFontSize(27);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(resume.name.toUpperCase(), rightX, rightY);
                     rightY += 10;
 
-                    doc.setFont('Aileron', 'bold');
-                    doc.setFontSize(12);
-                    doc.text('Summary', rightX, rightY);
+                    doc.setFont('Now', 'bold');
+                    doc.setFontSize(15.4);
+                    doc.text(resume.currentPosition.toUpperCase(), rightX, rightY);
+                    rightY += 10;
+
+                    doc.setFont('Now', 'bold');
+                    doc.setFontSize(14);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text('PROFILE', rightX, rightY);
                     doc.setLineWidth(0.2);
                     doc.line(rightX, rightY + 1, 200, rightY + 1);
                     rightY += 6;
                     doc.setFont('Aileron', 'normal');
                     doc.setFontSize(10);
-                    const summaryLines = doc.splitTextToSize(resume.summary, 130);
-                    if (rightY + summaryLines.length * 6 > 280) { addNewPage(); }
-                    doc.text(summaryLines, rightX, rightY);
-                    rightY += summaryLines.length * 6 + 4;
+                    const profileLines = doc.splitTextToSize(resume.summary, 130);
+                    if (rightY + profileLines.length * 6 > 280) { addNewPage(); }
+                    doc.text(profileLines, rightX, rightY);
+                    rightY += profileLines.length * 6 + 4;
 
-                    // ====== RIGHT PANEL: EXPERIENCE ======
-                    doc.setFont('Aileron', 'bold');
-                    doc.setFontSize(12);
-                    doc.text('Experience', rightX, rightY);
+
+                    doc.setFont('Now', 'bold');
+                    doc.setFontSize(14);
+                    doc.text('EXPERIENCE', rightX, rightY);
                     doc.line(rightX, rightY + 1, 200, rightY + 1);
                     rightY += 6;
                     doc.setFont('Aileron', 'normal');
                     doc.setFontSize(10);
                     if (resume.experiences.length > 0) {
                         resume.experiences.forEach((exp) => {
-                            const header = `${exp.company} - ${exp.jobTitle} (${exp.startDate} to ${exp.endDate})`;
-                            const headerLines = doc.splitTextToSize(header, 130);
+                            const title = exp.company;
+                            const role = exp.jobTitle;
+                            const dateRange = `(${exp.startDate} to ${exp.endDate})`;
                             const descriptionLines = doc.splitTextToSize(exp.description || '', 130);
 
-                            if (rightY + headerLines.length * 6 > 280) { addNewPage(); }
+                            // Title line (e.g., Freelance)
+                            if (rightY + 6 > 280) { addNewPage(); }
                             doc.setFont('Aileron', 'bold');
                             doc.setFontSize(12);
-                            doc.text(headerLines, rightX, rightY);
-                            rightY += headerLines.length * 6;
+                            doc.text(title, rightX, rightY);
+                            rightY += 6;
 
-                            if (rightY + descriptionLines.length * 6 > 280) { addNewPage(); }
+                            // Role and Dates on same line, justified
+                            if (rightY + 6 > 280) { addNewPage(); }
+                            const pageWidth = 210;
+                            const dateWidth = doc.getTextWidth(dateRange);
                             doc.setFont('Aileron', 'normal');
                             doc.setFontSize(10);
+                            doc.text(role, rightX, rightY);
+                            doc.text(dateRange, pageWidth - 10 - dateWidth, rightY);
+                            rightY += 6;
+
+                            // Description paragraph
+                            if (rightY + descriptionLines.length * 6 > 280) { addNewPage(); }
                             doc.text(descriptionLines, rightX, rightY);
                             rightY += descriptionLines.length * 6 + 4;
                         });
@@ -784,7 +796,6 @@
                         rightY += 10;
                     }
 
-                    // Save the document
                     doc.save(`${resume.name}_Resume.pdf`);
                 });
             });
