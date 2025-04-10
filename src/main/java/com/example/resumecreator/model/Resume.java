@@ -9,7 +9,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Column;
 
 @Entity
 public class Resume {
@@ -19,7 +21,21 @@ public class Resume {
     private String name;
     private String email;
     private String phone;
+
+    @Column(length = 2000) // Increase the length to accommodate larger summaries
     private String summary;
+
+    @Lob
+    private byte[] photo;
+
+    private String currentPosition;
+
+    public String getCurrentPosition() {
+        return currentPosition;
+    }
+    public void setCurrentPosition(String currentPosition) {
+        this.currentPosition = currentPosition;
+    }
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -33,6 +49,16 @@ public class Resume {
     @JsonManagedReference
     private List<Skill> skills;
 
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Link> links;
+
+    public List<Link> getLinks() {
+        return links;
+    }
+    public void setLinks(List<Link> links) {
+        this.links = links;
+    }
     public List<Education> getEducations() {
         return educations;
     }
@@ -80,6 +106,14 @@ public class Resume {
     }
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
     }
 
 }

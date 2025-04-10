@@ -8,9 +8,25 @@ public class ResumeDTO {
     private String email;
     private String phone;
     private String summary;
+    private byte[] photo;
+    private String currentPosition;
+    public String getCurrentPosition() {
+        return currentPosition;
+    }
+    public void setCurrentPosition(String currentPosition) {
+        this.currentPosition = currentPosition;
+    }
+
     private List<EducationDTO> educations;
     private List<ExperienceDTO> experiences;
     private List<SkillDTO> skills;
+    private List<LinkDTO> links;
+    public List<LinkDTO> getLinks() {
+        return links;
+    }
+    public void setLinks(List<LinkDTO> links) {
+        this.links = links;
+    }
     public Long getId() {
         return id;
     }
@@ -59,14 +75,22 @@ public class ResumeDTO {
     public void setSkills(List<SkillDTO> skills) {
         this.skills = skills;
     }
+    public byte[] getPhoto() {
+        return photo;
+    }
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
+    }
 
     public ResumeDTO() {
     }
 
-    public ResumeDTO(Long id, String name, String email, String phone, String summary) {
+    public ResumeDTO(Long id, String name, String email, String phone, String summary, byte[] photo,String currentPostion) {
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.summary = summary;
+        this.photo = photo;
+        this.currentPosition = currentPostion;
     }
 }

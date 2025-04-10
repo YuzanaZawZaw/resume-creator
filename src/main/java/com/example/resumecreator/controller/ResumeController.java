@@ -12,11 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.resumecreator.dto.ResumeDTO;
 import com.example.resumecreator.model.Education;
 import com.example.resumecreator.model.Experience;
+import com.example.resumecreator.model.Link;
 import com.example.resumecreator.model.Resume;
 import com.example.resumecreator.model.Skill;
 import com.example.resumecreator.service.ResumeService;
@@ -40,17 +43,59 @@ public class ResumeController {
     }
 
     @PostMapping("/create")
-    public Resume createResume(@RequestBody ResumeDTO resume) {
-        return resumeService.saveResumeDTO(resume);
+    public ResponseEntity<Resume> createResume(
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("phone") String phone,
+            @RequestParam("summary") String summary,
+            @RequestParam(value = "currentPosition", required = false) String currentPosition,
+            @RequestParam(value = "photo", required = false) MultipartFile photo) {
+        try {
+            Resume resume = new Resume();
+            resume.setName(name);
+            resume.setEmail(email);
+            resume.setPhone(phone);
+            resume.setSummary(summary);
+            resume.setCurrentPosition(currentPosition);
+
+            if (photo != null && !photo.isEmpty()) {
+                resume.setPhoto(photo.getBytes());
+            }
+
+            Resume savedResume = resumeService.saveResume(resume);
+            return new ResponseEntity<>(savedResume, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Resume> updateResume(@PathVariable Long id, @RequestBody Resume resume) {
+    @PutMapping("/{id}/update")
+    public ResponseEntity<?> updateResume(
+            @PathVariable Long id,
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("phone") String phone,
+            @RequestParam("summary") String summary,
+            @RequestParam(value = "currentPosition", required = false) String currentPosition,
+            @RequestParam(value = "photo", required = false) MultipartFile photo) {
         return resumeService.getResumeById(id)
                 .map(existingResume -> {
-                    resume.setId(id);
-                    Resume updatedResume = resumeService.saveResume(resume);
-                    return new ResponseEntity<>(updatedResume, HttpStatus.OK);
+                    try {
+                        existingResume.setName(name);
+                        existingResume.setEmail(email);
+                        existingResume.setPhone(phone);
+                        existingResume.setSummary(summary);
+                        existingResume.setCurrentPosition(currentPosition);
+        
+                        if (photo != null && !photo.isEmpty()) {
+                            existingResume.setPhoto(photo.getBytes());
+                        }
+        
+                        Resume updatedResume = resumeService.saveResume(existingResume);
+                        return new ResponseEntity<>(updatedResume, HttpStatus.OK);
+                    } catch (Exception e) {
+                        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -92,6 +137,30 @@ public class ResumeController {
                     return new ResponseEntity<>(savedSkill, HttpStatus.CREATED);
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{resumeId}/links")
+    public ResponseEntity<Link> addLink(@PathVariable Long resumeId, @RequestBody Link link) {
+        return resumeService.getResumeById(resumeId)
+                .map(resume -> {
+                    link.setResume(resume);
+                    Link savedLink = resumeService.saveLink(link);
+                    return new ResponseEntity<>(savedLink, HttpStatus.CREATED);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{resumeId}/links")
+    public ResponseEntity<?> getLinksByResumeId(@PathVariable Long resumeId) {
+        return resumeService.getResumeById(resumeId)
+                .map(resume -> new ResponseEntity<>(resumeService.getLinksByResumeId(resumeId), HttpStatus.OK))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/links/{id}")
+    public ResponseEntity<Void> deleteLink(@PathVariable Long id) {
+        resumeService.deleteLink(id);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/educations/{id}")

@@ -13,6 +13,8 @@ public class Experience {
     private String jobTitle;
     private String startDate;
     private String endDate;
+    
+    @Column(length = 2000)
     private String description;
 
     @ManyToOne

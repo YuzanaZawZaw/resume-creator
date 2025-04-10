@@ -9,6 +9,7 @@ public class Skill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String title;
     private String name;
 
     @ManyToOne
@@ -17,6 +18,13 @@ public class Skill {
     private Resume resume;
 
     // Getters and setters
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     public Long getId() {
         return id;

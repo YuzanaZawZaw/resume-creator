@@ -4,12 +4,15 @@ import com.example.resumecreator.dto.EducationDTO;
 import com.example.resumecreator.dto.ExperienceDTO;
 import com.example.resumecreator.dto.ResumeDTO;
 import com.example.resumecreator.dto.SkillDTO;
+import com.example.resumecreator.dto.LinkDTO;
 import com.example.resumecreator.model.Education;
 import com.example.resumecreator.model.Experience;
+import com.example.resumecreator.model.Link;
 import com.example.resumecreator.model.Resume;
 import com.example.resumecreator.model.Skill;
 import com.example.resumecreator.repository.EducationRepository;
 import com.example.resumecreator.repository.ExperienceRepository;
+import com.example.resumecreator.repository.LinkRepository;
 import com.example.resumecreator.repository.ResumeRepository;
 import com.example.resumecreator.repository.SkillRepository;
 
@@ -34,6 +37,9 @@ public class ResumeService {
     @Autowired
     private SkillRepository skillRepository;
 
+    @Autowired
+    private LinkRepository linkRepository;
+
     public List<ResumeDTO> getAllResumes() {
         List<Resume> resumes = resumeRepository.findAll();
         return resumes.stream().map(this::mapToDTO).collect(Collectors.toList());
@@ -49,6 +55,7 @@ public class ResumeService {
         resumeEntity.setEmail(resume.getEmail());
         resumeEntity.setPhone(resume.getPhone());
         resumeEntity.setSummary(resume.getSummary());
+        resumeEntity.setPhoto(resume.getPhoto());
         return resumeRepository.save(resumeEntity);
     }
 
@@ -91,6 +98,7 @@ public class ResumeService {
         dto.setEmail(resume.getEmail());
         dto.setPhone(resume.getPhone());
         dto.setSummary(resume.getSummary());
+        dto.setCurrentPosition(resume.getCurrentPosition());
         dto.setEducations(resume.getEducations().stream().map(education -> {
             EducationDTO educationDTO = new EducationDTO();
             educationDTO.setId(education.getId());
@@ -109,9 +117,29 @@ public class ResumeService {
             SkillDTO skillDTO = new SkillDTO();
             skillDTO.setId(skill.getId());
             skillDTO.setName(skill.getName());
+            skillDTO.setTitle(skill.getTitle());
             return skillDTO;
         }).collect(Collectors.toList()));
+        dto.setLinks(resume.getLinks().stream().map(link -> {
+            LinkDTO linkDTO = new LinkDTO();
+            linkDTO.setId(link.getId());
+            linkDTO.setUrl(link.getUrl());
+            linkDTO.setDescription(link.getDescription());
+            return linkDTO;
+        }).collect(Collectors.toList()));
         return dto;
+    }
+
+    public Object getLinksByResumeId(Long resumeId) {
+        return linkRepository.findById(resumeId);
+    }
+
+    public void deleteLink(Long id) {
+        linkRepository.deleteById(id);
+    }
+
+    public Link saveLink(Link link) {
+        return linkRepository.save(link);
     }
 
 }
